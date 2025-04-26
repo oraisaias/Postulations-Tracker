@@ -99,7 +99,11 @@ export function ApplicationModal({ open, onClose, onSave }: ApplicationModalProp
                 <FormItem>
                   <FormLabel>Empresa</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nombre de la empresa" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                    <Input
+                      placeholder="Nombre de la empresa"
+                      {...field}
+                      className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,7 +117,11 @@ export function ApplicationModal({ open, onClose, onSave }: ApplicationModalProp
                 <FormItem>
                   <FormLabel>Puesto</FormLabel>
                   <FormControl>
-                    <Input placeholder="Título del puesto" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                    <Input
+                      placeholder="Título del puesto"
+                      {...field}
+                      className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -169,7 +177,7 @@ export function ApplicationModal({ open, onClose, onSave }: ApplicationModalProp
                     <FormLabel>Estado</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-gray-50 dark:bg-gray-800">
+                        <SelectTrigger className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
                           <SelectValue placeholder="Selecciona un estado" />
                         </SelectTrigger>
                       </FormControl>
@@ -195,7 +203,11 @@ export function ApplicationModal({ open, onClose, onSave }: ApplicationModalProp
                   <FormItem>
                     <FormLabel>Ubicación</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: Ciudad de México" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                      <Input
+                        placeholder="Ej: Ciudad de México"
+                        {...field}
+                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -210,7 +222,7 @@ export function ApplicationModal({ open, onClose, onSave }: ApplicationModalProp
                     <FormLabel>Tipo de Trabajo</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-gray-50 dark:bg-gray-800">
+                        <SelectTrigger className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
                           <SelectValue placeholder="Selecciona un tipo" />
                         </SelectTrigger>
                       </FormControl>
@@ -233,7 +245,11 @@ export function ApplicationModal({ open, onClose, onSave }: ApplicationModalProp
                 <FormItem>
                   <FormLabel>URL de la Oferta (opcional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} className="bg-gray-50 dark:bg-gray-800" />
+                    <Input
+                      placeholder="https://..."
+                      {...field}
+                      className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -241,7 +257,12 @@ export function ApplicationModal({ open, onClose, onSave }: ApplicationModalProp
             />
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" type="button" onClick={onClose}>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={onClose}
+                className="border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+              >
                 Cancelar
               </Button>
               <Button

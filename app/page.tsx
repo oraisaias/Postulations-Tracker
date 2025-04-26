@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Dashboard } from "@/components/dashboard"
 import { ApplicationsList } from "@/components/applications-list"
 import { ConfigPanel } from "@/components/config-panel"
+import { UserInfoPanel } from "@/components/user-info-panel"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ApplicationModal } from "@/components/application-modal"
@@ -80,13 +81,13 @@ export default function Home() {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light">
-      <div className={`min-h-screen flex flex-col ${theme === "dark" ? "bg-gray-950" : "bg-gray-50"}`}>
-        <Navbar onNewApplication={handleNewApplication} />
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
+        <Navbar onNewApplication={handleNewApplication} activeTab={activeTab} />
 
         <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
           <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 bg-white dark:bg-gray-900 p-1 rounded-xl shadow-sm">
+            <TabsList className="grid w-full grid-cols-4 mb-8 bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm">
               <TabsTrigger
                 value="dashboard"
                 className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg"
@@ -98,6 +99,12 @@ export default function Home() {
                 className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg"
               >
                 Todas las Postulaciones
+              </TabsTrigger>
+              <TabsTrigger
+                value="user-info"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg"
+              >
+                Mi Información
               </TabsTrigger>
               <TabsTrigger
                 value="config"
@@ -122,6 +129,10 @@ export default function Home() {
                 isLoading={isLoading}
                 onApplicationClick={handleApplicationClick}
               />
+            </TabsContent>
+
+            <TabsContent value="user-info">
+              <UserInfoPanel />
             </TabsContent>
 
             <TabsContent value="config">

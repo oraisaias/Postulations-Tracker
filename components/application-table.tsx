@@ -20,10 +20,10 @@ export function ApplicationTable({
   showWorkType = false,
 }: ApplicationTableProps) {
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+    <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-50 dark:bg-gray-800/50">
+          <TableRow className="bg-gray-50 dark:bg-gray-900">
             <TableHead className="font-medium">Empresa</TableHead>
             <TableHead className="font-medium">Puesto</TableHead>
             {showLocation && <TableHead className="font-medium">Ubicación</TableHead>}
@@ -37,7 +37,7 @@ export function ApplicationTable({
           {applications.map((application) => (
             <TableRow
               key={application.id}
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors dark:border-gray-700"
               onClick={() => onApplicationClick(application)}
             >
               <TableCell className="font-medium">{application.company}</TableCell>

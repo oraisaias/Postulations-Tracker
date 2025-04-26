@@ -9,9 +9,7 @@ export function Footer() {
   const isDark = theme === "dark"
 
   return (
-    <footer
-      className={`w-full py-6 mt-12 border-t ${isDark ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}`}
-    >
+    <footer className="w-full py-6 mt-12 border-t bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex flex-col md:flex-row justify-between items-center">
           {/* Información del desarrollador */}
@@ -19,7 +17,7 @@ export function Footer() {
             <h3 className="text-lg font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
               Isaías Chávez Martínez
             </h3>
-            <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Desarrollador Web</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Desarrollador Web</p>
           </div>
 
           {/* Redes sociales */}
@@ -72,8 +70,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 text-center">
-          <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             © {new Date().getFullYear()} Isaías Chávez Martínez. Todos los derechos reservados.
           </p>
         </div>

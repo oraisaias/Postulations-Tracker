@@ -12,7 +12,6 @@ interface StatusSummaryProps {
 
 export function StatusSummary({ applications }: StatusSummaryProps) {
   const { theme } = useTheme()
-  const isDark = theme === "dark"
 
   // Contar aplicaciones por estado
   const counts = {

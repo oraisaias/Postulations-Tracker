@@ -15,3 +15,35 @@ export interface Application {
   createdAt: string
   updatedAt: string
 }
+
+// Nueva interfaz para la información del usuario
+export interface UserInfo {
+  // Información personal
+  fullName: string
+  email: string
+  phone: string
+  location: string
+  postalCode: string
+  linkedinUrl: string
+  portfolioUrl: string
+
+  // Información profesional
+  professionalTitle: string
+  yearsOfExperience: string
+  desiredSalary: string
+  availability: string
+  preferredWorkType: WorkType
+
+  // Educación
+  degree: string
+  institution: string
+  graduationYear: string
+
+  // Habilidades
+  skills: string
+  languages: string
+
+  // Respuestas comunes
+  professionalSummary: string
+  whyLookingForJob: string
+}

@@ -126,7 +126,11 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                   <FormItem>
                     <FormLabel>Empresa</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nombre de la empresa" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                      <Input
+                        placeholder="Nombre de la empresa"
+                        {...field}
+                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -143,9 +147,9 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                       <Input
                         placeholder="Título del puesto"
                         {...field}
-                        className="bg-gray-50 dark:bg-gray-800"
+                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
                         {...field}
-                        className="bg-gray-50 dark:bg-gray-800"
+                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
                       />
                     </FormControl>
                     <FormMessage />
@@ -166,7 +170,7 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-full pl-3 text-left font-normal bg-gray-50 dark:bg-gray-800",
+                                "w-full pl-3 text-left font-normal bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
                                 !field.value && "text-muted-foreground",
                               )}
                             >
@@ -202,7 +206,7 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                       <FormLabel>Estado</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-gray-50 dark:bg-gray-800">
+                          <SelectTrigger className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
                             <SelectValue placeholder="Selecciona un estado" />
                           </SelectTrigger>
                         </FormControl>
@@ -228,7 +232,11 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                     <FormItem>
                       <FormLabel>Ubicación</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ej: Ciudad de México" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                        <Input
+                          placeholder="Ej: Ciudad de México"
+                          {...field}
+                          className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -243,7 +251,7 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                       <FormLabel>Tipo de Trabajo</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-gray-50 dark:bg-gray-800">
+                          <SelectTrigger className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
                             <SelectValue placeholder="Selecciona un tipo" />
                           </SelectTrigger>
                         </FormControl>
@@ -266,7 +274,11 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                   <FormItem>
                     <FormLabel>URL de la Oferta (opcional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://..." {...field} className="bg-gray-50 dark:bg-gray-800" />
+                      <Input
+                        placeholder="https://..."
+                        {...field}
+                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -282,7 +294,7 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                     <FormControl>
                       <Textarea
                         placeholder="Agrega notas sobre la postulación, entrevistas, etc."
-                        className="min-h-[100px] bg-gray-50 dark:bg-gray-800"
+                        className="min-h-[100px] bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
                         {...field}
                       />
                     </FormControl>
@@ -292,7 +304,12 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
               />
 
               <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" type="button" onClick={() => setIsEditing(false)}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+                >
                   Cancelar
                 </Button>
                 <Button
@@ -369,7 +386,7 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
               )}
             </div>
 
-            <div className="flex justify-between pt-4 px-6 pb-6 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex justify-between pt-4 px-6 pb-6 border-t border-gray-200 dark:border-gray-700">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm">

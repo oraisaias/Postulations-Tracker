@@ -1,6 +1,7 @@
-import type { Application } from "./types"
+import type { Application, UserInfo } from "./types"
 
 const STORAGE_KEY = "job-applications"
+const USER_INFO_KEY = "user-info"
 
 // Obtener todas las postulaciones
 export function getApplications(): Application[] {
@@ -123,4 +124,76 @@ export function seedExampleData(): void {
   ]
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(exampleData))
+}
+
+// Nuevas funciones para gestionar la información del usuario
+
+// Obtener la información del usuario
+export function getUserInfo(): UserInfo {
+  if (typeof window === "undefined") return getDefaultUserInfo()
+
+  try {
+    const data = localStorage.getItem(USER_INFO_KEY)
+
+    // Si no hay datos guardados, usar los datos de ejemplo
+    if (!data) {
+      const defaultInfo = getDefaultUserInfo()
+      saveUserInfo(defaultInfo)
+      return defaultInfo
+    }
+
+    return JSON.parse(data)
+  } catch (error) {
+    console.error("Error al obtener la información del usuario:", error)
+    return getDefaultUserInfo()
+  }
+}
+
+// Guardar la información del usuario
+export function saveUserInfo(userInfo: UserInfo): void {
+  try {
+    localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfo))
+    // Disparar evento para actualizar otras pestañas
+    window.dispatchEvent(new Event("user-info-updated"))
+  } catch (error) {
+    console.error("Error al guardar la información del usuario:", error)
+    throw error
+  }
+}
+
+// Información de usuario por defecto con datos de ejemplo
+function getDefaultUserInfo(): UserInfo {
+  return {
+    // Información personal
+    fullName: "Isaías Chávez Martínez",
+    email: "isiaschavez.co@outlook.com",
+    phone: "9511212436",
+    location: "México",
+    postalCode: "",
+    linkedinUrl: "https://linkedin.com/in/isiaschavez",
+    portfolioUrl: "https://isiaschavez.com",
+
+    // Información profesional
+    professionalTitle: "Senior React Native Developer - Tech Lead",
+    yearsOfExperience: "3+ años",
+    desiredSalary: "",
+    availability: "Disponibilidad inmediata",
+    preferredWorkType: "remoto",
+
+    // Educación
+    degree: "Ingeniería en Computación",
+    institution: "Universidad Tecnológica de la Mixteca",
+    graduationYear: "2022",
+
+    // Habilidades
+    skills:
+      "React, React Native, Node.js, PostgreSQL, Docker, Nginx, AWS (S3, Lambda), Vue.js, Three.js, Python, Google Analytics, JavaScript, TypeScript",
+    languages: "Español (nativo), Inglés (C1)",
+
+    // Respuestas comunes
+    professionalSummary:
+      "Desarrollador Full Stack y React Native con más de 3 años de experiencia, actualmente en rol de Tech Lead. Experiencia en arquitectura de aplicaciones, desarrollo web y móvil, y liderazgo técnico. Especializado en React Native con énfasis en animaciones y análisis matemático. Experiencia en implementación de patrones SOLID y mejores prácticas de desarrollo. Capacidad para trabajar en equipos multiculturales y comunicación directa con clientes.",
+    whyLookingForJob:
+      "Busco una oportunidad que me permita seguir creciendo profesionalmente y enfrentar nuevos desafíos técnicos. Con experiencia en empresas como Softtek, IcaliaLabs e Inmersys, estoy interesado en proyectos innovadores donde pueda aplicar mi experiencia en desarrollo Full Stack y React Native, así como mis habilidades de liderazgo técnico para contribuir al éxito del equipo.",
+  }
 }
