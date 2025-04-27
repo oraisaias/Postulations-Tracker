@@ -1,10 +1,11 @@
 "use client"
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { StatusBadge } from "@/components/status-badge"
 import { WorkTypeBadge } from "@/components/work-type-badge"
 import type { Application } from "@/lib/types"
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, Star } from "lucide-react"
+import { motion } from "framer-motion"
 
 interface ApplicationTableProps {
   applications: Application[]
@@ -19,6 +20,21 @@ export function ApplicationTable({
   showLocation = false,
   showWorkType = false,
 }: ApplicationTableProps) {
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 },
+  }
+
   return (
     <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
       <Table>
@@ -33,14 +49,20 @@ export function ApplicationTable({
             <TableHead className="text-right font-medium">Enlace</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <motion.tbody variants={container} initial="hidden" animate="show">
           {applications.map((application) => (
-            <TableRow
+            <motion.tr
               key={application.id}
               className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors dark:border-gray-700"
               onClick={() => onApplicationClick(application)}
+              variants={item}
             >
-              <TableCell className="font-medium">{application.company}</TableCell>
+              <TableCell className="font-medium">
+                <div className="flex items-center gap-2">
+                  {application.company}
+                  {application.status === "oferta" && <Star className="h-4 w-4 text-amber-400 fill-amber-400" />}
+                </div>
+              </TableCell>
               <TableCell>{application.position}</TableCell>
               {showLocation && <TableCell>{application.location || "-"}</TableCell>}
               {showWorkType && (
@@ -66,9 +88,9 @@ export function ApplicationTable({
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-            </TableRow>
+            </motion.tr>
           ))}
-        </TableBody>
+        </motion.tbody>
       </Table>
     </div>
   )

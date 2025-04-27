@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { Copy, Edit, Check, ClipboardCheck } from "lucide-react"
+import { Copy, Edit, Check, ClipboardCheck, Trash2 } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 
-import type { UserInfo } from "@/lib/types"
+import type { UserInfo, WorkType } from "@/lib/types"
 import { getUserInfo, saveUserInfo } from "@/lib/storage"
 
 export function UserInfoPanel() {
@@ -262,13 +262,62 @@ export function UserInfoPanel() {
               </Button>
             </>
           ) : (
-            <Button
-              onClick={() => setIsEditing(true)}
-              className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white"
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "¿Estás seguro de que deseas borrar toda tu información personal? Esta acción no se puede deshacer.",
+                    )
+                  ) {
+                    // Crear un objeto con la misma estructura pero con valores vacíos
+                    const emptyUserInfo: UserInfo = {
+                      fullName: "",
+                      email: "",
+                      phone: "",
+                      location: "",
+                      postalCode: "",
+                      linkedinUrl: "",
+                      portfolioUrl: "",
+                      professionalTitle: "",
+                      yearsOfExperience: "",
+                      desiredSalary: "",
+                      availability: "",
+                      preferredWorkType: "remoto" as WorkType,
+                      degree: "",
+                      institution: "",
+                      graduationYear: "",
+                      skills: "",
+                      languages: "",
+                      professionalSummary: "",
+                      whyLookingForJob: "",
+                    }
+
+                    // Actualizar el estado y guardar en localStorage
+                    setUserInfo(emptyUserInfo)
+                    saveUserInfo(emptyUserInfo)
+
+                    toast({
+                      title: "Información borrada",
+                      description: "Toda tu información personal ha sido borrada correctamente.",
+                    })
+                  }
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Borrar todo
+              </Button>
+
+              <Button
+                onClick={() => setIsEditing(true)}
+                className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Editar
+              </Button>
+            </>
           )}
         </div>
       </div>

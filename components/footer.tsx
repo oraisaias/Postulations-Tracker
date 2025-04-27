@@ -3,6 +3,7 @@
 import { Github, Linkedin, Twitter, Globe, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
+import Link from "next/link"
 
 export function Footer() {
   const { theme } = useTheme()
@@ -71,6 +72,14 @@ export function Footer() {
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-center">
+          <div className="flex justify-center items-center gap-4 mb-2">
+            <Link
+              href="/privacy"
+              className="text-sm text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400"
+            >
+              Privacidad y Datos Locales
+            </Link>
+          </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             © {new Date().getFullYear()} Isaías Chávez Martínez. Todos los derechos reservados.
           </p>

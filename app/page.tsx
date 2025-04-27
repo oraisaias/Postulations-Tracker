@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Dashboard } from "@/components/dashboard"
 import { ApplicationsList } from "@/components/applications-list"
@@ -14,6 +13,9 @@ import { ApplicationDetailsModal } from "@/components/application-details-modal"
 import { getApplications, seedExampleData } from "@/lib/storage"
 import type { Application } from "@/lib/types"
 import { useTheme } from "next-themes"
+import { Toaster } from "@/components/ui/toaster"
+import { DashboardSkeleton, ApplicationTableSkeleton, UserInfoSkeleton } from "@/components/loading-states"
+import { AnimatePresence, motion } from "framer-motion"
 
 export default function Home() {
   const [applications, setApplications] = useState<Application[]>([])
@@ -26,16 +28,24 @@ export default function Home() {
   useEffect(() => {
     // Cargar datos del localStorage
     const loadApplications = () => {
-      let data = getApplications()
+      try {
+        let data = getApplications()
 
-      // Si no hay datos, cargar ejemplos
-      if (data.length === 0) {
-        seedExampleData()
-        data = getApplications()
+        // Si no hay datos, cargar ejemplos
+        if (data.length === 0) {
+          seedExampleData()
+          data = getApplications()
+        }
+
+        // Simular carga para mostrar los estados de carga
+        setTimeout(() => {
+          setApplications(data)
+          setIsLoading(false)
+        }, 800)
+      } catch (error) {
+        console.error("Error al cargar aplicaciones:", error)
+        setIsLoading(false)
       }
-
-      setApplications(data)
-      setIsLoading(false)
     }
 
     loadApplications()
@@ -77,73 +87,78 @@ export default function Home() {
   const handleApplicationUpdated = () => {
     // Disparar evento para recargar aplicaciones
     window.dispatchEvent(new Event("applications-updated"))
+
+    // Cerrar el modal de detalles
     setSelectedApplication(null)
+
+    // Recargar aplicaciones directamente
+    const loadApplications = () => {
+      const data = getApplications()
+      setApplications(data)
+    }
+
+    loadApplications()
+  }
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+  }
+
+  const fadeVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
   }
 
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
-        <Navbar onNewApplication={handleNewApplication} activeTab={activeTab} />
+        <Navbar onNewApplication={handleNewApplication} activeTab={activeTab} onTabChange={handleTabChange} />
 
         <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
-          <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8 bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm">
-              <TabsTrigger
-                value="dashboard"
-                className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg"
-              >
-                Dashboard
-              </TabsTrigger>
-              <TabsTrigger
-                value="applications"
-                className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg"
-              >
-                Todas las Postulaciones
-              </TabsTrigger>
-              <TabsTrigger
-                value="user-info"
-                className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg"
-              >
-                Mi Información
-              </TabsTrigger>
-              <TabsTrigger
-                value="config"
-                className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg"
-              >
-                Configuración
-              </TabsTrigger>
-            </TabsList>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={fadeVariants}
+              transition={{ duration: 0.3 }}
+            >
+              {activeTab === "dashboard" &&
+                (isLoading ? (
+                  <DashboardSkeleton />
+                ) : (
+                  <Dashboard
+                    applications={applications}
+                    isLoading={isLoading}
+                    onNewApplication={handleNewApplication}
+                    onApplicationClick={handleApplicationClick}
+                  />
+                ))}
 
-            <TabsContent value="dashboard">
-              <Dashboard
-                applications={applications}
-                isLoading={isLoading}
-                onNewApplication={handleNewApplication}
-                onApplicationClick={handleApplicationClick}
-              />
-            </TabsContent>
+              {activeTab === "applications" &&
+                (isLoading ? (
+                  <ApplicationTableSkeleton />
+                ) : (
+                  <ApplicationsList
+                    applications={applications}
+                    isLoading={isLoading}
+                    onApplicationClick={handleApplicationClick}
+                  />
+                ))}
 
-            <TabsContent value="applications">
-              <ApplicationsList
-                applications={applications}
-                isLoading={isLoading}
-                onApplicationClick={handleApplicationClick}
-              />
-            </TabsContent>
+              {activeTab === "user-info" && (isLoading ? <UserInfoSkeleton /> : <UserInfoPanel />)}
 
-            <TabsContent value="user-info">
-              <UserInfoPanel />
-            </TabsContent>
-
-            <TabsContent value="config">
-              <ConfigPanel />
-            </TabsContent>
-          </Tabs>
+              {activeTab === "config" && <ConfigPanel />}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         <Footer />
 
-        <ApplicationModal open={newModalOpen} onClose={handleNewModalClose} onSave={handleApplicationSaved} />
+        {newModalOpen && (
+          <ApplicationModal open={newModalOpen} onClose={handleNewModalClose} onSave={handleApplicationSaved} />
+        )}
 
         {selectedApplication && (
           <ApplicationDetailsModal
@@ -154,6 +169,7 @@ export default function Home() {
           />
         )}
       </div>
+      <Toaster />
     </ThemeProvider>
   )
 }

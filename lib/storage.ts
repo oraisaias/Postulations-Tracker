@@ -59,14 +59,32 @@ export function updateApplication(updatedApplication: Application): void {
 // Eliminar una postulación
 export function deleteApplication(id: string): void {
   try {
+    if (typeof window === "undefined") return
+
     const applications = getApplications()
     const filteredApplications = applications.filter((app) => app.id !== id)
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredApplications))
+
+    // Disparar eventos para actualizar la interfaz
+    window.dispatchEvent(new Event("storage"))
+    window.dispatchEvent(new Event("applications-updated"))
+
+    console.log(`Postulación con ID ${id} eliminada correctamente`)
+  } catch (error) {
+    console.error("Error al eliminar la postulación:", error)
+    throw error
+  }
+}
+
+// Eliminar todas las postulaciones
+export function deleteAllApplications(): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
     // Disparar evento para actualizar otras pestañas
     window.dispatchEvent(new Event("storage"))
   } catch (error) {
-    console.error("Error al eliminar la postulación:", error)
+    console.error("Error al eliminar todas las postulaciones:", error)
     throw error
   }
 }
@@ -120,6 +138,58 @@ export function seedExampleData(): void {
       notes: "Oferta recibida: $80,000 MXN mensuales. Beneficios incluyen seguro médico y bonos anuales.",
       createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: "4",
+      company: "Facebook",
+      position: "React Developer",
+      dateApplied: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), // 21 días atrás
+      status: "enviada",
+      location: "Ciudad de México",
+      workType: "remoto",
+      jobUrl: "https://facebook.careers",
+      notes: "Aplicación enviada a través de referencia interna.",
+      createdAt: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: "5",
+      company: "Twitter",
+      position: "Frontend Engineer",
+      dateApplied: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 días atrás
+      status: "entrevista",
+      location: "Remoto",
+      workType: "remoto",
+      jobUrl: "https://careers.twitter.com",
+      notes: "Segunda entrevista técnica programada para la próxima semana.",
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: "6",
+      company: "Uber",
+      position: "Mobile Developer",
+      dateApplied: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 días atrás
+      status: "rechazada",
+      location: "Guadalajara, Jalisco",
+      workType: "hibrido",
+      jobUrl: "https://careers.uber.com",
+      notes: "Rechazado después de la entrevista técnica. Necesito mejorar mis habilidades en algoritmos.",
+      createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: "7",
+      company: "Netflix",
+      position: "Senior Frontend Developer",
+      dateApplied: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 días atrás
+      status: "aceptada",
+      location: "Ciudad de México",
+      workType: "remoto",
+      jobUrl: "https://jobs.netflix.com",
+      notes: "Oferta aceptada. Inicio el próximo mes.",
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
     },
   ]
 

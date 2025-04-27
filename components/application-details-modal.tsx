@@ -1,16 +1,13 @@
 "use client"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
+import { useState, useEffect } from "react"
 import { CalendarIcon, Edit, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
@@ -18,38 +15,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/status-badge"
 import { WorkTypeBadge } from "@/components/work-type-badge"
-import type { Application } from "@/lib/types"
+import type { Application, ApplicationStatus, WorkType } from "@/lib/types"
 import { updateApplication, deleteApplication } from "@/lib/storage"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-
-const formSchema = z.object({
-  company: z.string().min(1, "La empresa es requerida"),
-  position: z.string().min(1, "El puesto es requerido"),
-  dateApplied: z.date({
-    required_error: "La fecha de aplicación es requerida",
-  }),
-  status: z.enum(["enviada", "entrevista", "rechazada", "oferta", "aceptada"], {
-    required_error: "El estado es requerido",
-  }),
-  location: z.string().optional(),
-  workType: z.enum(["remoto", "hibrido", "presencial"], {
-    required_error: "El tipo de trabajo es requerido",
-  }),
-  jobUrl: z.string().url("Ingresa una URL válida").optional().or(z.literal("")),
-  notes: z.string().optional(),
-})
-
-type FormValues = z.infer<typeof formSchema>
+import { useSimpleForm } from "@/lib/form-utils"
+import { toast } from "@/components/ui/use-toast"
 
 interface ApplicationDetailsModalProps {
   application: Application
@@ -58,35 +27,82 @@ interface ApplicationDetailsModalProps {
   onUpdate: () => void
 }
 
+interface FormValues {
+  company: string
+  position: string
+  dateApplied: Date
+  status: ApplicationStatus
+  location: string
+  workType: WorkType
+  jobUrl: string
+  notes: string
+  salary: string
+}
+
 export function ApplicationDetailsModal({ application, open, onClose, onUpdate }: ApplicationDetailsModalProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      company: application.company,
-      position: application.position,
-      dateApplied: new Date(application.dateApplied),
-      status: application.status,
-      location: application.location || "",
-      workType: application.workType || "presencial",
-      jobUrl: application.jobUrl || "",
-      notes: application.notes || "",
+  // Prepare initial values
+  const initialValues: FormValues = {
+    company: application.company || "",
+    position: application.position || "",
+    dateApplied: application.dateApplied ? new Date(application.dateApplied) : new Date(),
+    status: application.status || "enviada",
+    location: application.location || "",
+    workType: application.workType || "presencial",
+    jobUrl: application.jobUrl || "",
+    notes: application.notes || "",
+    salary: application.salary || "",
+  }
+
+  const { values, errors, isSubmitting, handleChange, handleDateChange, handleSelectChange, handleSubmit, setValues } =
+    useSimpleForm<FormValues>(initialValues)
+
+  // Update form values when application changes
+  useEffect(() => {
+    if (application) {
+      setValues({
+        company: application.company || "",
+        position: application.position || "",
+        dateApplied: application.dateApplied ? new Date(application.dateApplied) : new Date(),
+        status: application.status || "enviada",
+        location: application.location || "",
+        workType: application.workType || "presencial",
+        jobUrl: application.jobUrl || "",
+        notes: application.notes || "",
+        salary: application.salary || "",
+      })
+    }
+  }, [application, setValues])
+
+  const validationRules = {
+    company: (value: string) => (value ? null : "La empresa es requerida"),
+    position: (value: string) => (value ? null : "El puesto es requerido"),
+    dateApplied: (value: Date) => (value ? null : "La fecha de aplicación es requerida"),
+    status: (value: ApplicationStatus) => (value ? null : "El estado es requerido"),
+    workType: (value: WorkType) => (value ? null : "El tipo de trabajo es requerido"),
+    jobUrl: (value: string) => {
+      if (!value) return null
+      try {
+        new URL(value)
+        return null
+      } catch {
+        return "Ingresa una URL válida"
+      }
     },
-  })
+  }
 
-  const handleSubmit = (values: FormValues) => {
-    setIsSubmitting(true)
-
+  const onSubmitForm = (formValues: FormValues) => {
     try {
       const updatedApplication: Application = {
         ...application,
-        ...values,
-        dateApplied: values.dateApplied.toISOString(),
-        location: values.location || undefined,
-        jobUrl: values.jobUrl || undefined,
-        notes: values.notes || undefined,
+        ...formValues,
+        dateApplied: formValues.dateApplied.toISOString(),
+        location: formValues.location || undefined,
+        jobUrl: formValues.jobUrl || undefined,
+        notes: formValues.notes || undefined,
+        salary: formValues.salary || undefined,
         updatedAt: new Date().toISOString(),
       }
 
@@ -95,20 +111,38 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
       onUpdate()
     } catch (error) {
       console.error("Error al actualizar la postulación:", error)
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
   const handleDelete = () => {
-    deleteApplication(application.id)
-    onClose()
-    onUpdate()
+    try {
+      // Cerrar primero el modal para evitar problemas de estado
+      onClose()
+
+      // Luego eliminar la aplicación
+      deleteApplication(application.id)
+
+      // Notificar que se ha actualizado
+      onUpdate()
+
+      // Mostrar notificación de éxito
+      toast({
+        title: "Postulación eliminada",
+        description: "La postulación ha sido eliminada correctamente.",
+      })
+    } catch (error) {
+      console.error("Error al eliminar la postulación:", error)
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al eliminar la postulación.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-xl">
+      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-xl max-h-[90vh] flex flex-col">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             {isEditing ? "Editar Postulación" : application.company}
@@ -117,214 +151,187 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
         </DialogHeader>
 
         {isEditing ? (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 px-6 pb-6">
-              <FormField
-                control={form.control}
+          <form onSubmit={handleSubmit(onSubmitForm, validationRules)} className="space-y-4 px-6 pb-6 overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="company">Empresa</Label>
+              <Input
+                id="company"
                 name="company"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Empresa</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Nombre de la empresa"
-                        {...field}
-                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="Nombre de la empresa"
+                value={values.company}
+                onChange={handleChange}
+                className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
               />
+              {errors.company && <p className="text-sm text-red-500">{errors.company}</p>}
+            </div>
 
-              <FormField
-                control={form.control}
+            <div className="space-y-2">
+              <Label htmlFor="position">Puesto</Label>
+              <Input
+                id="position"
                 name="position"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Puesto</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Título del puesto"
-                        {...field}
-                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-                        {...field}
-                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="Título del puesto"
+                value={values.position}
+                onChange={handleChange}
+                className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
               />
+              {errors.position && <p className="text-sm text-red-500">{errors.position}</p>}
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="dateApplied"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Fecha de Aplicación</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
-                                !field.value && "text-muted-foreground",
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP", { locale: es })
-                              ) : (
-                                <span>Selecciona una fecha</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
-                            <SelectValue placeholder="Selecciona un estado" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="enviada">Enviada</SelectItem>
-                          <SelectItem value="entrevista">En Entrevista</SelectItem>
-                          <SelectItem value="rechazada">Rechazada</SelectItem>
-                          <SelectItem value="oferta">Oferta Recibida</SelectItem>
-                          <SelectItem value="aceptada">Aceptada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dateApplied">Fecha de Aplicación</Label>
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="dateApplied"
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700",
+                        !values.dateApplied && "text-muted-foreground",
+                      )}
+                    >
+                      {values.dateApplied ? (
+                        format(values.dateApplied, "PPP", { locale: es })
+                      ) : (
+                        <span>Selecciona una fecha</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={values.dateApplied}
+                      onSelect={(date) => {
+                        handleDateChange("dateApplied", date)
+                        setCalendarOpen(false)
+                      }}
+                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                {errors.dateApplied && <p className="text-sm text-red-500">{errors.dateApplied}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
+              <div className="space-y-2">
+                <Label htmlFor="status">Estado</Label>
+                <Select
+                  value={values.status}
+                  onValueChange={(value) => handleSelectChange("status", value as ApplicationStatus)}
+                >
+                  <SelectTrigger
+                    id="status"
+                    className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+                  >
+                    <SelectValue placeholder="Selecciona un estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="enviada">Enviada</SelectItem>
+                    <SelectItem value="entrevista">En Entrevista</SelectItem>
+                    <SelectItem value="rechazada">Rechazada</SelectItem>
+                    <SelectItem value="oferta">Oferta Recibida</SelectItem>
+                    <SelectItem value="aceptada">Aceptada</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="location">Ubicación</Label>
+                <Input
+                  id="location"
                   name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ubicación</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ej: Ciudad de México"
-                          {...field}
-                          className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="workType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de Trabajo</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
-                            <SelectValue placeholder="Selecciona un tipo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="remoto">Remoto</SelectItem>
-                          <SelectItem value="hibrido">Híbrido</SelectItem>
-                          <SelectItem value="presencial">Presencial</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  placeholder="Ej: Ciudad de México"
+                  value={values.location}
+                  onChange={handleChange}
+                  className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
                 />
               </div>
 
-              <FormField
-                control={form.control}
+              <div className="space-y-2">
+                <Label htmlFor="workType">Tipo de Trabajo</Label>
+                <Select
+                  value={values.workType}
+                  onValueChange={(value) => handleSelectChange("workType", value as WorkType)}
+                >
+                  <SelectTrigger
+                    id="workType"
+                    className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+                  >
+                    <SelectValue placeholder="Selecciona un tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="remoto">Remoto</SelectItem>
+                    <SelectItem value="hibrido">Híbrido</SelectItem>
+                    <SelectItem value="presencial">Presencial</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.workType && <p className="text-sm text-red-500">{errors.workType}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="salary">Salario (opcional)</Label>
+              <Input
+                id="salary"
+                name="salary"
+                placeholder="Ej: $50,000 MXN mensual"
+                value={values.salary}
+                onChange={handleChange}
+                className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="jobUrl">URL de la Oferta (opcional)</Label>
+              <Input
+                id="jobUrl"
                 name="jobUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL de la Oferta (opcional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="https://..."
-                        {...field}
-                        className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="https://..."
+                value={values.jobUrl}
+                onChange={handleChange}
+                className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
               />
+              {errors.jobUrl && <p className="text-sm text-red-500">{errors.jobUrl}</p>}
+            </div>
 
-              <FormField
-                control={form.control}
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notas (opcional)</Label>
+              <Textarea
+                id="notes"
                 name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notas (opcional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Agrega notas sobre la postulación, entrevistas, etc."
-                        className="min-h-[100px] bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="Agrega notas sobre la postulación, entrevistas, etc."
+                value={values.notes}
+                onChange={handleChange}
+                className="min-h-[100px] bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
               />
+            </div>
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white"
-                >
-                  {isSubmitting ? "Guardando..." : "Actualizar"}
-                </Button>
-              </div>
-            </form>
-          </Form>
+            <div className="flex justify-end gap-2 pt-4 sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white"
+              >
+                {isSubmitting ? "Guardando..." : "Actualizar"}
+              </Button>
+            </div>
+          </form>
         ) : (
           <>
-            <div className="grid gap-4 py-4 px-6">
+            <div className="grid gap-4 py-4 px-6 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Empresa</h3>
@@ -362,6 +369,13 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
                 </div>
               </div>
 
+              {application.salary && (
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Salario</h3>
+                  <p className="mt-1">{application.salary}</p>
+                </div>
+              )}
+
               {application.jobUrl && (
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">URL de la Oferta</h3>
@@ -387,28 +401,10 @@ export function ApplicationDetailsModal({ application, open, onClose, onUpdate }
             </div>
 
             <div className="flex justify-between pt-4 px-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Eliminar
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-lg">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta acción no se puede deshacer. Se eliminará permanentemente esta postulación.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
-                      Eliminar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button variant="destructive" size="sm" onClick={handleDelete}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Eliminar
+              </Button>
 
               <Button
                 onClick={() => setIsEditing(true)}
