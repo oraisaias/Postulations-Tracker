@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ThemeProvider } from "@/components/theme-provider"
 import { Dashboard } from "@/components/dashboard"
 import { ApplicationsList } from "@/components/applications-list"
 import { ConfigPanel } from "@/components/config-panel"
@@ -13,9 +12,9 @@ import { ApplicationDetailsModal } from "@/components/application-details-modal"
 import { getApplications, seedExampleData } from "@/lib/storage"
 import type { Application } from "@/lib/types"
 import { useTheme } from "next-themes"
-import { Toaster } from "@/components/ui/toaster"
 import { DashboardSkeleton, ApplicationTableSkeleton, UserInfoSkeleton } from "@/components/loading-states"
 import { AnimatePresence, motion } from "framer-motion"
+import { JobTrackerStructuredData } from "@/components/structured-data"
 
 export default function Home() {
   const [applications, setApplications] = useState<Application[]>([])
@@ -110,66 +109,66 @@ export default function Home() {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
-        <Navbar onNewApplication={handleNewApplication} activeTab={activeTab} onTabChange={handleTabChange} />
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
+      {/* Datos estructurados para SEO */}
+      <JobTrackerStructuredData />
 
-        <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={fadeVariants}
-              transition={{ duration: 0.3 }}
-            >
-              {activeTab === "dashboard" &&
-                (isLoading ? (
-                  <DashboardSkeleton />
-                ) : (
-                  <Dashboard
-                    applications={applications}
-                    isLoading={isLoading}
-                    onNewApplication={handleNewApplication}
-                    onApplicationClick={handleApplicationClick}
-                  />
-                ))}
+      <Navbar onNewApplication={handleNewApplication} activeTab={activeTab} onTabChange={handleTabChange} />
 
-              {activeTab === "applications" &&
-                (isLoading ? (
-                  <ApplicationTableSkeleton />
-                ) : (
-                  <ApplicationsList
-                    applications={applications}
-                    isLoading={isLoading}
-                    onApplicationClick={handleApplicationClick}
-                  />
-                ))}
+      <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={fadeVariants}
+            transition={{ duration: 0.3 }}
+          >
+            {activeTab === "dashboard" &&
+              (isLoading ? (
+                <DashboardSkeleton />
+              ) : (
+                <Dashboard
+                  applications={applications}
+                  isLoading={isLoading}
+                  onNewApplication={handleNewApplication}
+                  onApplicationClick={handleApplicationClick}
+                />
+              ))}
 
-              {activeTab === "user-info" && (isLoading ? <UserInfoSkeleton /> : <UserInfoPanel />)}
+            {activeTab === "applications" &&
+              (isLoading ? (
+                <ApplicationTableSkeleton />
+              ) : (
+                <ApplicationsList
+                  applications={applications}
+                  isLoading={isLoading}
+                  onApplicationClick={handleApplicationClick}
+                />
+              ))}
 
-              {activeTab === "config" && <ConfigPanel />}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+            {activeTab === "user-info" && (isLoading ? <UserInfoSkeleton /> : <UserInfoPanel />)}
 
-        <Footer />
+            {activeTab === "config" && <ConfigPanel />}
+          </motion.div>
+        </AnimatePresence>
+      </main>
 
-        {newModalOpen && (
-          <ApplicationModal open={newModalOpen} onClose={handleNewModalClose} onSave={handleApplicationSaved} />
-        )}
+      <Footer />
 
-        {selectedApplication && (
-          <ApplicationDetailsModal
-            application={selectedApplication}
-            open={!!selectedApplication}
-            onClose={handleCloseDetailsModal}
-            onUpdate={handleApplicationUpdated}
-          />
-        )}
-      </div>
-      <Toaster />
-    </ThemeProvider>
+      {newModalOpen && (
+        <ApplicationModal open={newModalOpen} onClose={handleNewModalClose} onSave={handleApplicationSaved} />
+      )}
+
+      {selectedApplication && (
+        <ApplicationDetailsModal
+          application={selectedApplication}
+          open={!!selectedApplication}
+          onClose={handleCloseDetailsModal}
+          onUpdate={handleApplicationUpdated}
+        />
+      )}
+    </div>
   )
 }

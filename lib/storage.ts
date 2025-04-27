@@ -236,18 +236,18 @@ function getDefaultUserInfo(): UserInfo {
   return {
     // Información personal
     fullName: "Isaías Chávez Martínez",
-    email: "isiaschavez.co@outlook.com",
+    email: "isaiaschavez.co@outlook.com",
     phone: "9511212436",
     location: "México",
     postalCode: "",
-    linkedinUrl: "https://linkedin.com/in/isiaschavez",
-    portfolioUrl: "https://isiaschavez.com",
+    linkedinUrl: "https://www.linkedin.com/in/whoisaiaschavez3435/",
+    portfolioUrl: "https://isaiaschavez.vercel.app/",
 
     // Información profesional
     professionalTitle: "Senior React Native Developer - Tech Lead",
-    yearsOfExperience: "3+ años",
-    desiredSalary: "",
-    availability: "Disponibilidad inmediata",
+    yearsOfExperience: "4 años",
+    desiredSalary: "60,000 - 80,000 MXN",
+    availability: "Disponible en 1 mes",
     preferredWorkType: "remoto",
 
     // Educación
@@ -257,13 +257,13 @@ function getDefaultUserInfo(): UserInfo {
 
     // Habilidades
     skills:
-      "React, React Native, Node.js, PostgreSQL, Docker, Nginx, AWS (S3, Lambda), Vue.js, Three.js, Python, Google Analytics, JavaScript, TypeScript",
+      "React Native, React.js, JavaScript, TypeScript, Node.js, PostgreSQL, Docker, Nginx, AWS (S3, Lambda), Vue.js, Three.js, Python, Google Analytics",
     languages: "Español (nativo), Inglés (C1)",
 
     // Respuestas comunes
     professionalSummary:
-      "Desarrollador Full Stack y React Native con más de 3 años de experiencia, actualmente en rol de Tech Lead. Experiencia en arquitectura de aplicaciones, desarrollo web y móvil, y liderazgo técnico. Especializado en React Native con énfasis en animaciones y análisis matemático. Experiencia en implementación de patrones SOLID y mejores prácticas de desarrollo. Capacidad para trabajar en equipos multiculturales y comunicación directa con clientes.",
+      "Desarrollador Full Stack y React Native con más de 4 años de experiencia, actualmente en rol de Tech Lead. Experiencia en arquitectura de aplicaciones, desarrollo web y móvil, y liderazgo técnico. Especializado en React Native con énfasis en animaciones y análisis matemático. Experiencia en implementación de patrones SOLID y mejores prácticas de desarrollo. Capacidad para trabajar en equipos multiculturales y comunicación directa con clientes.",
     whyLookingForJob:
-      "Busco una oportunidad que me permita seguir creciendo profesionalmente y enfrentar nuevos desafíos técnicos. Con experiencia en empresas como Softtek, IcaliaLabs e Inmersys, estoy interesado en proyectos innovadores donde pueda aplicar mi experiencia en desarrollo Full Stack y React Native, así como mis habilidades de liderazgo técnico para contribuir al éxito del equipo.",
+      "Busco una oportunidad que me permita seguir creciendo profesionalmente y enfrentar nuevos desafíos técnicos. Con experiencia en empresas como Softtek, IcaliaLabs e Inmersys, estoy interesado en proyectos innovadores donde pueda aplicar mi experiencia en desarrollo React Native y Full Stack, así como mis habilidades de liderazgo técnico para contribuir al éxito del equipo.",
   }
 }
